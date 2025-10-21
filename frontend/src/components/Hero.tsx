@@ -14,14 +14,14 @@ const Hero = () => {
         </div>
         
         <h1 className="text-6xl md:text-7xl font-bold tracking-tight">
-          <span className="text-foreground">Secure Cross-Exchange</span>
+          <span className="text-foreground">ShadowTrade</span>
           <br />
-          <span className="text-primary">Arbitrage Strategies</span>
+          <span className="text-primary">Privacy-Preserving Arbitrage</span>
         </h1>
         
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Enterprise-grade privacy infrastructure for professional arbitrage teams. 
-          Deploy, manage, and execute strategies across multiple exchanges with zero-knowledge proofs.
+          Advanced arbitrage strategy management with fully homomorphic encryption. 
+          Secure, private, and efficient cross-exchange trading with zero-knowledge proofs.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
