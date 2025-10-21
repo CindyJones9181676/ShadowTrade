@@ -224,8 +224,8 @@ const encryptedParams = await fheInstance.encrypt({
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/CindyJones9181676/CovertArbitrage-Deck.git
-   cd CovertArbitrage-Deck
+   git clone https://github.com/CindyJones9181676/ShadowTrade.git
+   cd ShadowTrade
    ```
 
 2. **Install dependencies**
@@ -439,7 +439,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Contact Information
 - **Website**: https://shadowtrade-joh8jox9y-songsus-projects.vercel.app
-- **GitHub**: https://github.com/CindyJones9181676/CovertArbitrage-Deck
+- **GitHub**: https://github.com/CindyJones9181676/ShadowTrade
 - **Email**: [Contact Information]
 
 ---
