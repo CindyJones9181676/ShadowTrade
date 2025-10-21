@@ -11,7 +11,7 @@ ShadowTrade addresses the critical privacy concerns in algorithmic trading by le
 ### 🎥 Demo Video
 Watch our platform demonstration to see ShadowTrade in action:
 
-https://github.com/CindyJones9181676/ShadowTrade/blob/master/docs/2025-10-22%2002.17.49.mp4
+[📥 Download Demo Video](https://github.com/CindyJones9181676/ShadowTrade/raw/master/docs/2025-10-22%2002.17.49.mp4)
 
 ### Key Innovation
 - **First-of-its-kind FHE-powered trading platform**
