@@ -4,26 +4,26 @@ const steps = [
   {
     icon: Wallet,
     number: '01',
-    title: 'Connect Wallet',
-    description: 'Connect your Web3 wallet to authenticate and access the platform securely.'
+    title: '连接钱包',
+    description: '连接Web3钱包，安全认证并访问ShadowTrade平台功能。'
   },
   {
     icon: Upload,
     number: '02',
-    title: 'Deploy Strategy',
-    description: 'Upload your arbitrage strategy and configure exchange connections with encrypted API keys.'
+    title: '加密策略',
+    description: '创建套利策略，使用全同态加密技术保护策略参数，确保核心算法安全。'
   },
   {
     icon: Play,
     number: '03',
-    title: 'Execute Trades',
-    description: 'Activate your strategy and let the protocol execute trades automatically across exchanges.'
+    title: '团队协作',
+    description: '邀请团队成员，设置权限等级，共享策略或订阅优质策略跟单。'
   },
   {
     icon: BarChart3,
     number: '04',
-    title: 'Monitor Performance',
-    description: 'Track real-time metrics, analyze results, and optimize your strategy parameters.'
+    title: '专业带单',
+    description: '选择专业带单服务，实时监控策略表现，获得专业交易员指导。'
   }
 ];
 
@@ -33,10 +33,10 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            How It <span className="text-primary">Works</span>
+            使用 <span className="text-primary">流程</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Get started in minutes with our streamlined deployment process
+            简单四步，开启你的加密策略交易之旅
           </p>
         </div>
 

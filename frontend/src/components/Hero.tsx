@@ -16,12 +16,15 @@ const Hero = () => {
         <h1 className="text-6xl md:text-7xl font-bold tracking-tight">
           <span className="text-foreground">ShadowTrade</span>
           <br />
-          <span className="text-primary">Privacy-Preserving Arbitrage</span>
+          <span className="text-primary">加密策略交易平台</span>
         </h1>
         
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Advanced arbitrage strategy management with fully homomorphic encryption. 
-          Secure, private, and efficient cross-exchange trading with zero-knowledge proofs.
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          策略加密存储 • 团队协作管理 • 策略共享交易 • 专业带单服务
+          <br />
+          <span className="text-lg text-muted-foreground/80">
+            基于全同态加密的隐私保护套利策略平台
+          </span>
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
