@@ -8,6 +8,11 @@ ShadowTrade is a revolutionary platform that combines fully homomorphic encrypti
 
 ShadowTrade addresses the critical privacy concerns in algorithmic trading by leveraging fully homomorphic encryption to protect strategy parameters and execution logic. Unlike traditional trading platforms where strategies are exposed to potential theft or reverse engineering, ShadowTrade ensures that your trading algorithms remain completely private while still being executable on-chain.
 
+### 🎥 Demo Video
+Watch our platform demonstration to see ShadowTrade in action:
+
+https://github.com/CindyJones9181676/ShadowTrade/blob/master/docs/2025-10-22%2002.17.49.mp4
+
 ### Key Innovation
 - **First-of-its-kind FHE-powered trading platform**
 - **Complete strategy privacy without compromising functionality**
