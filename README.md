@@ -177,35 +177,35 @@ const encryptedParams = await fheInstance.encrypt({
 
 ## 🗺️ Development Roadmap
 
-### Phase 1: Core Platform (Q4 2024) ✅
+### Phase 1: Core Platform (Q4 2025) ✅
 - [x] FHE integration with Zama SDK
 - [x] Basic strategy creation and management
 - [x] Smart contract deployment on Sepolia
 - [x] Frontend interface development
 - [x] Wallet integration and authentication
 
-### Phase 2: Team Collaboration (Q1 2025)
+### Phase 2: Team Collaboration (Q1 2026)
 - [ ] Multi-user workspace implementation
 - [ ] Role-based permission system
 - [ ] Encrypted strategy sharing
 - [ ] Team management interface
 - [ ] Collaborative strategy development
 
-### Phase 3: Strategy Marketplace (Q2 2025)
+### Phase 3: Strategy Marketplace (Q2 2026)
 - [ ] Strategy sharing and monetization
 - [ ] Subscription-based access model
 - [ ] Copy trading functionality
 - [ ] Revenue sharing mechanisms
 - [ ] Strategy performance analytics
 
-### Phase 4: Professional Services (Q3 2025)
+### Phase 4: Professional Services (Q3 2026)
 - [ ] Expert trader network
 - [ ] Managed strategy services
 - [ ] Advanced risk management
 - [ ] Professional analytics dashboard
 - [ ] API for third-party integrations
 
-### Phase 5: Advanced Features (Q4 2025)
+### Phase 5: Advanced Features (Q4 2026)
 - [ ] Cross-chain strategy execution
 - [ ] Advanced FHE optimizations
 - [ ] Machine learning integration
