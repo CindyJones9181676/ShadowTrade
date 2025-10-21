@@ -16,12 +16,15 @@ const Hero = () => {
         <h1 className="text-6xl md:text-7xl font-bold tracking-tight">
           <span className="text-foreground">ShadowTrade</span>
           <br />
-          <span className="text-primary">Privacy-Preserving Arbitrage</span>
+          <span className="text-primary">Encrypted Strategy Platform</span>
         </h1>
         
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Advanced arbitrage strategy management with fully homomorphic encryption. 
-          Secure, private, and efficient cross-exchange trading with zero-knowledge proofs.
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          Strategy Encryption • Team Collaboration • Strategy Sharing • Professional Trading Services
+          <br />
+          <span className="text-lg text-muted-foreground/80">
+            Privacy-preserving arbitrage platform with fully homomorphic encryption
+          </span>
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">

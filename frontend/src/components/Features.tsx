@@ -3,33 +3,33 @@ import { Lock, Network, Code, Database, TrendingUp, Users } from 'lucide-react';
 const features = [
   {
     icon: Lock,
-    title: 'End-to-End Encryption',
-    description: 'Military-grade encryption ensures your trading strategies and API keys remain secure at all times.'
-  },
-  {
-    icon: Network,
-    title: 'Multi-Exchange Support',
-    description: 'Seamlessly connect to 15+ major exchanges including Binance, Coinbase, Kraken, and more.'
-  },
-  {
-    icon: Code,
-    title: 'Custom Strategy Deployment',
-    description: 'Deploy your proprietary algorithms with full control over execution parameters and risk limits.'
-  },
-  {
-    icon: Database,
-    title: 'Decentralized Storage',
-    description: 'Strategy data stored on-chain with IPFS integration for maximum redundancy and availability.'
-  },
-  {
-    icon: TrendingUp,
-    title: 'Real-Time Analytics',
-    description: 'Monitor performance metrics, PnL, and execution quality across all your strategies in real-time.'
+    title: 'Strategy Encryption',
+    description: 'Fully homomorphic encryption protects your strategy parameters, ensuring core algorithms remain absolutely secure.'
   },
   {
     icon: Users,
     title: 'Team Collaboration',
-    description: 'Manage permissions and roles for team members with granular access controls.'
+    description: 'Multi-user collaboration with role-based permissions, strategy sharing, and granular access controls for efficient teamwork.'
+  },
+  {
+    icon: Network,
+    title: 'Strategy Sharing',
+    description: 'Premium strategies can be selectively shared, allowing other users to subscribe and follow, enabling strategy monetization.'
+  },
+  {
+    icon: TrendingUp,
+    title: 'Professional Trading Services',
+    description: 'Experienced traders provide professional trading services with real-time strategy execution and risk management.'
+  },
+  {
+    icon: Code,
+    title: 'Smart Strategy Deployment',
+    description: 'Custom strategy parameters with automated execution, real-time monitoring of strategy performance and returns.'
+  },
+  {
+    icon: Database,
+    title: 'Privacy Protection Technology',
+    description: 'Zero-knowledge proof-based privacy computing ensures complete confidentiality of strategy logic and data security.'
   }
 ];
 
@@ -39,10 +39,10 @@ const Features = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Built for <span className="text-primary">Professional Traders</span>
+            Core <span className="text-primary">Features</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to run sophisticated arbitrage operations at scale
+            Focused on strategy encryption, team collaboration, strategy sharing, and professional trading services
           </p>
         </div>
 

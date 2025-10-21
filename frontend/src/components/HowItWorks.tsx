@@ -5,25 +5,25 @@ const steps = [
     icon: Wallet,
     number: '01',
     title: 'Connect Wallet',
-    description: 'Connect your Web3 wallet to authenticate and access the platform securely.'
+    description: 'Connect your Web3 wallet for secure authentication and access to ShadowTrade platform features.'
   },
   {
     icon: Upload,
     number: '02',
-    title: 'Deploy Strategy',
-    description: 'Upload your arbitrage strategy and configure exchange connections with encrypted API keys.'
+    title: 'Encrypt Strategy',
+    description: 'Create arbitrage strategies using fully homomorphic encryption to protect strategy parameters and ensure core algorithm security.'
   },
   {
     icon: Play,
     number: '03',
-    title: 'Execute Trades',
-    description: 'Activate your strategy and let the protocol execute trades automatically across exchanges.'
+    title: 'Team Collaboration',
+    description: 'Invite team members, set permission levels, share strategies or subscribe to premium strategies for copy trading.'
   },
   {
     icon: BarChart3,
     number: '04',
-    title: 'Monitor Performance',
-    description: 'Track real-time metrics, analyze results, and optimize your strategy parameters.'
+    title: 'Professional Trading',
+    description: 'Choose professional trading services, monitor strategy performance in real-time, and get guidance from expert traders.'
   }
 ];
 
@@ -36,7 +36,7 @@ const HowItWorks = () => {
             How It <span className="text-primary">Works</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Get started in minutes with our streamlined deployment process
+            Simple four steps to start your encrypted strategy trading journey
           </p>
         </div>
 
