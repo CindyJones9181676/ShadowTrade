@@ -2,15 +2,15 @@
 pragma solidity ^0.8.24;
 
 import {FHE, euint8, euint16, euint32, euint64, euint128, ebool, externalEuint8, externalEuint16, externalEuint32, externalEuint64, externalEuint128} from "@fhevm/solidity/lib/FHE.sol";
-import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
+import {ZamaEthereumConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 
 /**
  * @title CovertArbitrageDeck
  * @notice Privacy-preserving arbitrage strategy management platform
  * @dev Implements FHE-encrypted strategy parameters, position tracking, and performance analytics
- *      Following Zama FHE best practices for parameter handling
+ *      Updated for fhEVM v0.9.1 - Uses ZamaEthereumConfig and self-relaying decryption pattern
  */
-contract CovertArbitrageDeck is SepoliaConfig {
+contract CovertArbitrageDeck is ZamaEthereumConfig {
 
     // ============ Enums ============
 
@@ -98,6 +98,11 @@ contract CovertArbitrageDeck is SepoliaConfig {
     mapping(address => bytes32[]) public traderStrategies;
     mapping(bytes32 => ExecutionRecord[]) public strategyExecutions;
 
+    // Strategy sharing mappings
+    mapping(bytes32 => address[]) public strategySharedWith;      // strategyId => list of shared users
+    mapping(address => bytes32[]) public sharedWithMe;            // user => list of strategies shared with them
+    mapping(bytes32 => mapping(address => bool)) public isSharedWith;  // strategyId => user => isShared
+
     PolicyConfig public policy;
 
     // Aggregate statistics (encrypted)
@@ -123,6 +128,8 @@ contract CovertArbitrageDeck is SepoliaConfig {
     event ExecutionRecorded(bytes32 indexed executionId, bytes32 indexed strategyId, uint256 timestamp);
     event PerformanceReviewRequested(bytes32 indexed strategyId, uint256 requestId, uint256 timestamp);
     event PerformanceReviewCompleted(bytes32 indexed strategyId, uint64 profitability, uint8 performanceBand, uint256 timestamp);
+    event StrategyShared(bytes32 indexed strategyId, address indexed owner, address indexed sharedWith, uint256 timestamp);
+    event StrategyShareRevoked(bytes32 indexed strategyId, address indexed owner, address indexed revokedFrom, uint256 timestamp);
 
     // ============ Errors ============
 
@@ -131,6 +138,9 @@ contract CovertArbitrageDeck is SepoliaConfig {
     error InvalidStatus();
     error Unauthorized();
     error InvalidParameters();
+    error AlreadyShared();
+    error NotShared();
+    error CannotShareWithSelf();
 
     // ============ Modifiers ============
 
@@ -179,7 +189,7 @@ contract CovertArbitrageDeck is SepoliaConfig {
 
     /**
      * @notice Create a new arbitrage strategy with encrypted parameters
-     * @dev ✅ Correct parameter handling following FHE guide Section 10.2
+     * @dev Uses FHE.fromExternal() for importing encrypted parameters (fhEVM 0.9.1 pattern)
      */
     function createStrategy(
         bytes32 strategyId,
@@ -196,7 +206,7 @@ contract CovertArbitrageDeck is SepoliaConfig {
     ) external {
         if (strategies[strategyId].createdAt != 0) revert StrategyAlreadyExists();
 
-        // ✅ Import encrypted parameters using FHE.fromExternal()
+        // Import encrypted parameters using FHE.fromExternal()
         euint64 capital = FHE.fromExternal(encryptedCapital, inputProof);
         euint64 exposure = FHE.fromExternal(encryptedExposure, inputProof);
         euint32 targetReturn = FHE.fromExternal(encryptedTargetReturn, inputProof);
@@ -205,7 +215,7 @@ contract CovertArbitrageDeck is SepoliaConfig {
         euint8 venueCount = FHE.fromExternal(encryptedVenueCount, inputProof);
         euint8 confidence = FHE.fromExternal(encryptedConfidence, inputProof);
 
-        // ✅ Grant permissions to contract
+        // Grant permissions to contract
         FHE.allowThis(capital);
         FHE.allowThis(exposure);
         FHE.allowThis(targetReturn);
@@ -214,7 +224,7 @@ contract CovertArbitrageDeck is SepoliaConfig {
         FHE.allowThis(venueCount);
         FHE.allowThis(confidence);
 
-        // ✅ Grant permissions to user for read access
+        // Grant permissions to user for read access
         FHE.allow(capital, msg.sender);
         FHE.allow(exposure, msg.sender);
         FHE.allow(targetReturn, msg.sender);
@@ -264,7 +274,7 @@ contract CovertArbitrageDeck is SepoliaConfig {
         if (strat.trader != msg.sender) revert Unauthorized();
         if (strat.status != StrategyStatus.Draft) revert InvalidStatus();
 
-        // ✅ Validate using FHE operations
+        // Validate using FHE operations
         PolicyConfig memory pol = policy;
 
         ebool capitalValid = FHE.and(
@@ -289,8 +299,8 @@ contract CovertArbitrageDeck is SepoliaConfig {
             )
         );
 
-        // Note: In production, you would decrypt allValid to verify
-        // For now, we trust validation passed if function doesn't revert
+        // Note: In production, client would use self-relaying decryption to verify allValid
+        // For now, we proceed with activation
 
         strat.status = StrategyStatus.Active;
         strat.activatedAt = block.timestamp;
@@ -309,7 +319,7 @@ contract CovertArbitrageDeck is SepoliaConfig {
 
     /**
      * @notice Record a trade execution
-     * @dev ✅ Uses FHE.fromExternal() for encrypted parameters
+     * @dev Uses FHE.fromExternal() for encrypted parameters
      */
     function recordExecution(
         bytes32 strategyId,
@@ -322,7 +332,7 @@ contract CovertArbitrageDeck is SepoliaConfig {
         Strategy storage strat = strategies[strategyId];
         if (strat.status != StrategyStatus.Active) revert InvalidStatus();
 
-        // ✅ Import encrypted execution data
+        // Import encrypted execution data
         euint64 amount = FHE.fromExternal(encryptedAmount, inputProof);
         euint64 pnl = FHE.fromExternal(encryptedPnL, inputProof);
 
@@ -416,6 +426,28 @@ contract CovertArbitrageDeck is SepoliaConfig {
         FHE.allow(performanceBand, msg.sender);
 
         emit PerformanceReviewCompleted(strategyId, 0, 0, block.timestamp);
+    }
+
+    /**
+     * @notice Make encrypted data publicly decryptable for self-relaying pattern
+     * @dev fhEVM 0.9.1 pattern: client calls publicDecrypt() on returned ciphertext
+     */
+    function makeCapitalDecryptable(bytes32 strategyId) external strategyExists(strategyId) {
+        Strategy storage strat = strategies[strategyId];
+        if (strat.trader != msg.sender) revert Unauthorized();
+
+        // Make the capital ciphertext publicly decryptable
+        FHE.makePubliclyDecryptable(strat.capitalCipher);
+    }
+
+    /**
+     * @notice Make PnL data publicly decryptable for self-relaying pattern
+     */
+    function makePnLDecryptable(bytes32 strategyId) external strategyExists(strategyId) {
+        Strategy storage strat = strategies[strategyId];
+        if (strat.trader != msg.sender) revert Unauthorized();
+
+        FHE.makePubliclyDecryptable(strat.realizedPnLCipher);
     }
 
     /**
@@ -525,5 +557,149 @@ contract CovertArbitrageDeck is SepoliaConfig {
     function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "Invalid address");
         owner = newOwner;
+    }
+
+    // ============ Strategy Sharing Functions ============
+
+    /**
+     * @notice Share a strategy with another user (read-only access)
+     * @param strategyId The strategy to share
+     * @param recipient The user to share with
+     */
+    function shareStrategy(bytes32 strategyId, address recipient) external strategyExists(strategyId) {
+        Strategy storage strat = strategies[strategyId];
+        if (strat.trader != msg.sender) revert Unauthorized();
+        if (recipient == msg.sender) revert CannotShareWithSelf();
+        if (recipient == address(0)) revert InvalidParameters();
+        if (isSharedWith[strategyId][recipient]) revert AlreadyShared();
+
+        // Add to share mappings
+        isSharedWith[strategyId][recipient] = true;
+        strategySharedWith[strategyId].push(recipient);
+        sharedWithMe[recipient].push(strategyId);
+
+        // Grant FHE read access to recipient for encrypted data
+        FHE.allow(strat.capitalCipher, recipient);
+        FHE.allow(strat.exposureCipher, recipient);
+        FHE.allow(strat.realizedPnLCipher, recipient);
+        FHE.allow(strat.targetReturnBpsCipher, recipient);
+        FHE.allow(strat.stopLossBpsCipher, recipient);
+
+        emit StrategyShared(strategyId, msg.sender, recipient, block.timestamp);
+    }
+
+    /**
+     * @notice Revoke strategy access from a user
+     * @param strategyId The strategy to revoke access from
+     * @param user The user to revoke access from
+     */
+    function revokeShare(bytes32 strategyId, address user) external strategyExists(strategyId) {
+        Strategy storage strat = strategies[strategyId];
+        if (strat.trader != msg.sender) revert Unauthorized();
+        if (!isSharedWith[strategyId][user]) revert NotShared();
+
+        // Remove from share mapping
+        isSharedWith[strategyId][user] = false;
+
+        // Remove from strategySharedWith array
+        address[] storage sharedList = strategySharedWith[strategyId];
+        for (uint256 i = 0; i < sharedList.length; i++) {
+            if (sharedList[i] == user) {
+                sharedList[i] = sharedList[sharedList.length - 1];
+                sharedList.pop();
+                break;
+            }
+        }
+
+        // Remove from sharedWithMe array
+        bytes32[] storage userShared = sharedWithMe[user];
+        for (uint256 i = 0; i < userShared.length; i++) {
+            if (userShared[i] == strategyId) {
+                userShared[i] = userShared[userShared.length - 1];
+                userShared.pop();
+                break;
+            }
+        }
+
+        emit StrategyShareRevoked(strategyId, msg.sender, user, block.timestamp);
+    }
+
+    /**
+     * @notice Get list of strategies shared with the caller
+     * @return Array of strategy IDs shared with the caller
+     */
+    function getStrategiesSharedWithMe() external view returns (bytes32[] memory) {
+        return sharedWithMe[msg.sender];
+    }
+
+    /**
+     * @notice Get list of users a strategy is shared with
+     * @param strategyId The strategy to check
+     * @return Array of addresses the strategy is shared with
+     */
+    function getStrategySharedUsers(bytes32 strategyId) external view strategyExists(strategyId) returns (address[] memory) {
+        Strategy storage strat = strategies[strategyId];
+        if (strat.trader != msg.sender) revert Unauthorized();
+        return strategySharedWith[strategyId];
+    }
+
+    /**
+     * @notice Check if a strategy is shared with a specific user
+     * @param strategyId The strategy to check
+     * @param user The user to check
+     * @return Whether the strategy is shared with the user
+     */
+    function isStrategySharedWith(bytes32 strategyId, address user) external view returns (bool) {
+        return isSharedWith[strategyId][user];
+    }
+
+    /**
+     * @notice Get shared strategy info (for users the strategy is shared with)
+     * @param strategyId The strategy to get info for
+     */
+    function getSharedStrategyInfo(bytes32 strategyId) external view strategyExists(strategyId) returns (
+        address trader,
+        OpportunityType opportunityType,
+        RiskTier riskTier,
+        StrategyStatus status,
+        uint256 totalExecutions,
+        uint256 successfulExecutions,
+        uint256 createdAt
+    ) {
+        Strategy storage strat = strategies[strategyId];
+        // Allow access if caller is trader OR strategy is shared with caller
+        if (strat.trader != msg.sender && !isSharedWith[strategyId][msg.sender]) revert Unauthorized();
+
+        return (
+            strat.trader,
+            strat.opportunityType,
+            strat.riskTier,
+            strat.status,
+            strat.totalExecutions,
+            strat.successfulExecutions,
+            strat.createdAt
+        );
+    }
+
+    /**
+     * @notice Get encrypted strategy data (for trader or shared users)
+     */
+    function getSharedEncryptedStrategy(bytes32 strategyId) external view returns (
+        euint64 capital,
+        euint64 exposure,
+        euint64 realizedPnL,
+        euint32 targetReturn,
+        euint32 stopLoss
+    ) {
+        Strategy storage strat = strategies[strategyId];
+        // Allow access if caller is trader OR strategy is shared with caller
+        require(strat.trader == msg.sender || isSharedWith[strategyId][msg.sender], "Not authorized");
+        return (
+            strat.capitalCipher,
+            strat.exposureCipher,
+            strat.realizedPnLCipher,
+            strat.targetReturnBpsCipher,
+            strat.stopLossBpsCipher
+        );
     }
 }
