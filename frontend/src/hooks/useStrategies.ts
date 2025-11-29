@@ -1,203 +1,272 @@
-import { useState, useEffect } from 'react';
-import { useAccount, useWatchContractEvent, usePublicClient } from 'wagmi';
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract';
+import { useCallback, useEffect, useState } from 'react';
 import { readContract } from '@wagmi/core';
+import { useAccount } from 'wagmi';
 import { config } from '@/config/rainbowkit';
+import { CONTRACT_ABI, CONTRACT_ADDRESS } from '@/config/contract';
 
-interface StrategyInfo {
-  strategyId: string;
+// Enums matching contract
+export enum StrategyStatus {
+  Draft = 0,
+  Active = 1,
+  Paused = 2,
+  Completed = 3,
+  Liquidated = 4,
+}
+
+export enum OpportunityType {
+  Spatial = 0,
+  Temporal = 1,
+  Statistical = 2,
+  Triangular = 3,
+}
+
+export enum RiskTier {
+  Conservative = 0,
+  Moderate = 1,
+  Aggressive = 2,
+}
+
+export const getStatusLabel = (status: StrategyStatus): string => {
+  const labels = ['Draft', 'Active', 'Paused', 'Completed', 'Liquidated'];
+  return labels[status] || 'Unknown';
+};
+
+export const getOpportunityLabel = (type: OpportunityType): string => {
+  const labels = ['Spatial', 'Temporal', 'Statistical', 'Triangular'];
+  return labels[type] || 'Unknown';
+};
+
+export const getRiskTierLabel = (tier: RiskTier): string => {
+  const labels = ['Conservative', 'Moderate', 'Aggressive'];
+  return labels[tier] || 'Unknown';
+};
+
+export interface StrategySummary {
+  strategyId: `0x${string}`;
   trader: string;
-  opportunityType: number;
-  riskTier: number;
-  status: number;
-  totalExecutions: number;
+  opportunityType: OpportunityType;
+  riskTier: RiskTier;
+  status: StrategyStatus;
+  totalExecutions: bigint;
+  successfulExecutions: bigint;
   createdAt: number;
+  activatedAt: number;
+  lastExecutionAt: number;
+}
+
+export interface PlatformStats {
+  strategyCount: bigint;
+  activeStrategyCount: bigint;
+  totalExecutionCount: bigint;
 }
 
 export const useStrategies = () => {
-  const { address } = useAccount();
-  const publicClient = usePublicClient();
-  const [strategies, setStrategies] = useState<StrategyInfo[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { address, isConnected } = useAccount();
+  const [strategies, setStrategies] = useState<StrategySummary[]>([]);
+  const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [useRealData, setUseRealData] = useState(true); // 默认使用真实数据
 
-  // 监听 StrategyCreated 事件
-  useWatchContractEvent({
-    address: CONTRACT_ADDRESS as `0x${string}`,
-    abi: CONTRACT_ABI,
-    eventName: 'StrategyCreated',
-    onLogs: async (logs) => {
-      if (!address || !useRealData) return;
+  const fetchStrategies = useCallback(async () => {
+    if (!isConnected || !address) {
+      setStrategies([]);
+      return;
+    }
 
-      try {
-        // 过滤出当前用户的策略
-        const userLogs = logs.filter(log => 
-          log.args.trader?.toLowerCase() === address.toLowerCase()
-        );
+    setLoading(true);
+    setError(null);
 
-        if (userLogs.length === 0) return;
+    try {
+      // Get trader's strategy IDs
+      const strategyIds = (await readContract(config, {
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: CONTRACT_ABI,
+        functionName: 'getTraderStrategies',
+        args: [address],
+      })) as `0x${string}`[];
 
-        // 为每个新策略获取详细信息
-        for (const log of userLogs) {
-          try {
-            const strategyId = log.args.strategyId;
-            
-            // 检查是否已存在
-            const exists = strategies.some(s => s.strategyId === strategyId);
-            if (exists) continue;
-            
-            // 获取策略详细信息
-            const strategyInfo = await readContract(config, {
-              address: CONTRACT_ADDRESS as `0x${string}`,
-              abi: CONTRACT_ABI,
-              functionName: 'getStrategyInfo',
-              args: [strategyId as `0x${string}`],
-            });
-            
-            if (strategyInfo) {
-              const newStrategy: StrategyInfo = {
-                strategyId,
-                trader: log.args.trader,
-                opportunityType: Number(log.args.opportunityType),
-                riskTier: Number(strategyInfo.riskTier),
-                status: Number(strategyInfo.status),
-                totalExecutions: Number(strategyInfo.totalExecutions),
-                createdAt: Number(log.args.timestamp) * 1000,
-              };
-              
-              setStrategies(prev => [...prev, newStrategy]);
-            }
-          } catch (err) {
-            console.error(`Error fetching info for strategy ${log.args.strategyId}:`, err);
-          }
-        }
-      } catch (err) {
-        console.error('Error processing strategy events:', err);
-        setError('Failed to process strategy events');
-      }
-    },
-  });
+      // Fetch details for each strategy
+      const strategiesData = await Promise.all(
+        strategyIds.map(async (strategyId) => {
+          const info = (await readContract(config, {
+            address: CONTRACT_ADDRESS as `0x${string}`,
+            abi: CONTRACT_ABI,
+            functionName: 'getStrategyInfo',
+            args: [strategyId],
+          })) as readonly [string, number, number, number, bigint, bigint];
+
+          // Also get strategy metadata
+          const strategyData = (await readContract(config, {
+            address: CONTRACT_ADDRESS as `0x${string}`,
+            abi: CONTRACT_ABI,
+            functionName: 'strategies',
+            args: [strategyId],
+          })) as readonly [
+            `0x${string}`, // strategyId
+            string,        // trader
+            number,        // opportunityType
+            number,        // riskTier
+            number,        // status
+            bigint,        // capitalCipher
+            bigint,        // exposureCipher
+            bigint,        // realizedPnLCipher
+            bigint,        // totalFeeCipher
+            bigint,        // targetReturnBpsCipher
+            bigint,        // stopLossBpsCipher
+            bigint,        // maxSlippageBpsCipher
+            bigint,        // venueCountCipher
+            bigint,        // confidenceCipher
+            bigint,        // createdAt
+            bigint,        // activatedAt
+            bigint,        // lastExecutionAt
+            bigint,        // totalExecutions
+            bigint,        // successfulExecutions
+          ];
+
+          return {
+            strategyId,
+            trader: info[0],
+            opportunityType: info[1] as OpportunityType,
+            riskTier: info[2] as RiskTier,
+            status: info[3] as StrategyStatus,
+            totalExecutions: info[4],
+            successfulExecutions: info[5],
+            createdAt: Number(strategyData[14]) * 1000,
+            activatedAt: Number(strategyData[15]) * 1000,
+            lastExecutionAt: Number(strategyData[16]) * 1000,
+          };
+        })
+      );
+
+      setStrategies(strategiesData);
+
+      // Fetch platform stats
+      const [strategyCount, activeStrategyCount, totalExecutionCount] = await Promise.all([
+        readContract(config, {
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          abi: CONTRACT_ABI,
+          functionName: 'strategyCount',
+        }) as Promise<bigint>,
+        readContract(config, {
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          abi: CONTRACT_ABI,
+          functionName: 'activeStrategyCount',
+        }) as Promise<bigint>,
+        readContract(config, {
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          abi: CONTRACT_ABI,
+          functionName: 'totalExecutionCount',
+        }) as Promise<bigint>,
+      ]);
+
+      setPlatformStats({
+        strategyCount,
+        activeStrategyCount,
+        totalExecutionCount,
+      });
+    } catch (err) {
+      console.error('[useStrategies] Failed to load strategies:', err);
+      setStrategies([]);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }, [address, isConnected]);
 
   useEffect(() => {
-    const fetchStrategies = async () => {
-      if (!address) {
-        setStrategies([]);
+    fetchStrategies();
+  }, [fetchStrategies]);
+
+  return {
+    strategies,
+    platformStats,
+    loading,
+    error,
+    refetch: fetchStrategies,
+  };
+};
+
+// Hook for fetching strategies shared with the current user
+export const useSharedStrategies = () => {
+  const { address, isConnected } = useAccount();
+  const [sharedStrategies, setSharedStrategies] = useState<StrategySummary[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSharedStrategies = useCallback(async () => {
+    if (!isConnected || !address) {
+      setSharedStrategies([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Get strategy IDs shared with the user
+      const sharedIds = (await readContract(config, {
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: CONTRACT_ABI,
+        functionName: 'getStrategiesSharedWithMe',
+        args: [],
+        account: address,
+      })) as `0x${string}`[];
+
+      if (sharedIds.length === 0) {
+        setSharedStrategies([]);
         setLoading(false);
         return;
       }
 
-      try {
-        setLoading(true);
-        setError(null);
-        
-        if (useRealData) {
-          // 获取真实数据 - 直接查询合约
+      // Fetch details for each shared strategy
+      const strategiesData = await Promise.all(
+        sharedIds.map(async (strategyId) => {
           try {
-            console.log('[useStrategies] Fetching strategies from contract...');
-            
-            // 直接调用合约的 getTraderStrategies 函数
-            const strategyIds = await readContract(config, {
+            const info = (await readContract(config, {
               address: CONTRACT_ADDRESS as `0x${string}`,
               abi: CONTRACT_ABI,
-              functionName: 'getTraderStrategies',
-              args: [address as `0x${string}`],
-            });
+              functionName: 'getSharedStrategyInfo',
+              args: [strategyId],
+              account: address,
+            })) as readonly [string, number, number, number, bigint, bigint, bigint];
 
-            console.log('[useStrategies] Found strategy IDs:', strategyIds.length);
-
-            if (strategyIds.length === 0) {
-              setStrategies([]);
-              return;
-            }
-
-            // 为每个策略获取详细信息
-            const strategiesWithInfo: StrategyInfo[] = [];
-            
-            for (const strategyId of strategyIds) {
-              try {
-                console.log('[useStrategies] Fetching info for strategy:', strategyId);
-                
-                // 获取策略详细信息
-                const strategyInfo = await readContract(config, {
-                  address: CONTRACT_ADDRESS as `0x${string}`,
-                  abi: CONTRACT_ABI,
-                  functionName: 'getStrategyInfo',
-                  args: [strategyId as `0x${string}`],
-                });
-                
-                if (strategyInfo) {
-                  strategiesWithInfo.push({
-                    strategyId,
-                    trader: strategyInfo.trader,
-                    opportunityType: Number(strategyInfo.opportunityType),
-                    riskTier: Number(strategyInfo.riskTier),
-                    status: Number(strategyInfo.status),
-                    totalExecutions: Number(strategyInfo.totalExecutions),
-                    createdAt: Date.now() - Math.random() * 86400000, // 临时时间戳，实际应该从合约获取
-                  });
-                  console.log('[useStrategies] Added strategy:', strategyId);
-                }
-              } catch (err) {
-                console.error(`Error fetching info for strategy ${strategyId}:`, err);
-              }
-            }
-
-            console.log('[useStrategies] Final strategies:', strategiesWithInfo.length);
-            setStrategies(strategiesWithInfo);
+            return {
+              strategyId,
+              trader: info[0],
+              opportunityType: info[1] as OpportunityType,
+              riskTier: info[2] as RiskTier,
+              status: info[3] as StrategyStatus,
+              totalExecutions: info[4],
+              successfulExecutions: info[5],
+              createdAt: Number(info[6]) * 1000,
+              activatedAt: 0,
+              lastExecutionAt: 0,
+            };
           } catch (err) {
-            console.error('Error fetching strategies from contract:', err);
-            setError('Failed to load strategies: ' + (err instanceof Error ? err.message : 'Unknown error'));
-            setStrategies([]);
+            console.error(`[useSharedStrategies] Failed to load strategy ${strategyId}:`, err);
+            return null;
           }
-        } else {
-          // 使用模拟数据（仅在切换模式时使用）
-          const mockStrategies: StrategyInfo[] = [
-            {
-              strategyId: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-              trader: address,
-              opportunityType: 0, // Spatial
-              riskTier: 1, // Moderate
-              status: 1, // Active
-              totalExecutions: 5,
-              createdAt: Date.now() - 86400000, // 1 day ago
-            },
-            {
-              strategyId: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-              trader: address,
-              opportunityType: 1, // Temporal
-              riskTier: 2, // Aggressive
-              status: 2, // Paused
-              totalExecutions: 12,
-              createdAt: Date.now() - 172800000, // 2 days ago
-            }
-          ];
-          
-          setStrategies(mockStrategies);
-        }
-      } catch (err) {
-        console.error('Error fetching strategies:', err);
-        setError('Failed to load strategies');
-      } finally {
-        setLoading(false);
-      }
-    };
+        })
+      );
 
-    fetchStrategies();
-  }, [address, useRealData]);
-
-  const refetch = () => {
-    setLoading(true);
-    // 重新获取策略数据
-    setTimeout(() => {
+      setSharedStrategies(strategiesData.filter((s): s is StrategySummary => s !== null));
+    } catch (err) {
+      console.error('[useSharedStrategies] Failed to load shared strategies:', err);
+      setSharedStrategies([]);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
       setLoading(false);
-    }, 1000);
-  };
+    }
+  }, [address, isConnected]);
+
+  useEffect(() => {
+    fetchSharedStrategies();
+  }, [fetchSharedStrategies]);
 
   return {
-    strategies,
+    sharedStrategies,
     loading,
     error,
-    refetch
+    refetch: fetchSharedStrategies,
   };
 };
