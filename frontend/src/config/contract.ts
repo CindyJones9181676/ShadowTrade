@@ -1,8 +1,8 @@
-import CovertArbitrageDeckABI from '../contracts/CovertArbitrageDeck.json';
+import CovertArbitrageDeck from '../contracts/CovertArbitrageDeck.json';
 
-export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0xd7352dAC0D73358c32C53b132Bf0d3005ECB1077';
+export const CONTRACT_ADDRESS = import.meta.env.VITE_CBN_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000';
 
-export const CONTRACT_ABI = CovertArbitrageDeckABI.abi;
+export const CONTRACT_ABI = CovertArbitrageDeck.abi;
 
 export const CHAIN_ID = 11155111; // Sepolia
 
