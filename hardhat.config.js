@@ -38,7 +38,8 @@ module.exports = {
     cache: "./cache",
     artifacts: "./artifacts",
   },
+  // fhEVM 0.9.1 configuration
   fhevm: {
-    network: "sepolia",
+    // Uses ZamaEthereumConfig which auto-resolves based on block.chainid
   },
 };
