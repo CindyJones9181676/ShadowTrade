@@ -1,452 +1,355 @@
 # ShadowTrade
 
-**Privacy-Preserving Arbitrage Strategy Platform**
+**Privacy-Preserving Arbitrage Strategy Platform powered by Fully Homomorphic Encryption**
 
-ShadowTrade is a revolutionary platform that combines fully homomorphic encryption (FHE) with blockchain technology to create the world's first privacy-preserving arbitrage strategy management system. Built on Zama's FHE SDK and deployed on Ethereum Sepolia testnet, ShadowTrade enables traders to create, share, and execute encrypted trading strategies while maintaining complete confidentiality of their proprietary algorithms.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-shadowtrade.vercel.app-blue)](https://shadowtrade.vercel.app)
+[![Network](https://img.shields.io/badge/Network-Sepolia%20Testnet-orange)](https://sepolia.etherscan.io)
+[![FHE SDK](https://img.shields.io/badge/Zama%20fhEVM-v0.9.1-green)](https://docs.zama.ai/fhevm)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-## 🌟 Project Overview
+## Overview
 
-ShadowTrade addresses the critical privacy concerns in algorithmic trading by leveraging fully homomorphic encryption to protect strategy parameters and execution logic. Unlike traditional trading platforms where strategies are exposed to potential theft or reverse engineering, ShadowTrade ensures that your trading algorithms remain completely private while still being executable on-chain.
+ShadowTrade is a revolutionary decentralized platform that enables traders to create, manage, and share encrypted arbitrage strategies on-chain. By leveraging Zama's Fully Homomorphic Encryption (FHE) technology, ShadowTrade ensures complete confidentiality of trading parameters while maintaining full on-chain verifiability and execution capability.
 
-### 🎥 Demo Video
-Watch our platform demonstration to see ShadowTrade in action:
+### The Problem We Solve
 
-[📥 Download Demo Video](https://github.com/CindyJones9181676/ShadowTrade/raw/master/docs/2025-10-22%2002.17.49.mp4)
+Traditional algorithmic trading faces a critical dilemma:
+- **On-chain transparency** exposes proprietary strategies to front-running and copy-trading
+- **Off-chain execution** sacrifices trustlessness and verifiability
+- **Centralized platforms** require trusting third parties with sensitive trading logic
 
-### Key Innovation
-- **First-of-its-kind FHE-powered trading platform**
-- **Complete strategy privacy without compromising functionality**
-- **Team collaboration with encrypted strategy sharing**
-- **Professional trading services with privacy guarantees**
+ShadowTrade resolves this trilemma by executing encrypted computations directly on-chain, ensuring strategies remain private while being fully verifiable and decentralized.
 
-## 🚀 Core Features
+## Key Features
 
-### 🔐 Strategy Encryption
-- **Fully Homomorphic Encryption**: Strategy parameters are encrypted using Zama's FHE SDK
-- **Zero-Knowledge Execution**: Strategies execute without revealing their logic
-- **Encrypted Storage**: All strategy data stored on-chain in encrypted form
-- **Privacy-Preserving Analytics**: Performance metrics without exposing strategy details
+### Encrypted Strategy Management
+- **FHE-Protected Parameters**: Capital, exposure limits, target returns, stop-loss thresholds, and slippage tolerances are encrypted using Zama's fhEVM
+- **On-Chain Privacy**: All sensitive data stored as encrypted ciphertexts (euint64, euint32, euint16, euint8)
+- **Zero-Knowledge Execution**: Strategy logic executes on encrypted data without decryption
 
-### 👥 Team Collaboration
-- **Multi-user Workspaces**: Invite team members with role-based permissions
-- **Strategy Sharing**: Securely share encrypted strategies within teams
-- **Permission Management**: Granular access controls for different strategy components
-- **Collaborative Development**: Build strategies together while maintaining privacy
+### Strategy Sharing with FHE Access Control
+- **Granular Sharing**: Share strategies with specific wallet addresses using `FHE.allow()`
+- **Read-Only Access**: Recipients can view encrypted parameters but cannot modify
+- **Revocable Permissions**: Strategy owners can revoke access at any time
+- **Privacy-Preserving Collaboration**: Share insights without exposing actual values
 
-### 📈 Strategy Sharing & Monetization
-- **Premium Strategy Marketplace**: Share profitable strategies with other users
-- **Subscription Model**: Monetize your successful trading algorithms
-- **Copy Trading**: Follow top-performing strategies with privacy protection
-- **Revenue Sharing**: Earn from strategy subscriptions and performance fees
+### Multi-Strategy Portfolio
+- **Four Arbitrage Types**: Spatial, Temporal, Statistical, and Triangular arbitrage strategies
+- **Risk Tiers**: Conservative, Moderate, and Aggressive risk profiles
+- **Lifecycle Management**: Draft → Active → Paused → Completed status transitions
+- **Performance Tracking**: Encrypted execution counts and success rates
 
-### 🎯 Professional Trading Services
-- **Expert Trader Network**: Connect with professional traders
-- **Managed Strategy Services**: Professional strategy management and execution
-- **Risk Management**: Advanced risk controls with encrypted parameters
-- **Performance Analytics**: Detailed reporting without strategy exposure
+## Technical Architecture
 
-## 🏗️ System Architecture
+### Smart Contract: CovertArbitrageDeck.sol
 
-### High-Level Architecture
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        ShadowTrade Platform                     │
-├─────────────────┬─────────────────┬─────────────────┬───────────┤
-│   Frontend      │   FHE Engine    │   Smart         │   Data    │
-│   (React)       │   (Zama SDK)    │   Contracts     │   Layer   │
-│                 │                 │   (Solidity)    │           │
-├─────────────────┼─────────────────┼─────────────────┼───────────┤
-│ • Wallet Connect│ • Encryption   │ • Strategy Mgmt │ • IPFS    │
-│ • Strategy UI   │ • Computation  │ • Team Mgmt     │ • Events  │
-│ • Analytics     │ • Verification │ • Sharing       │ • Storage │
-│ • Team Mgmt     │ • Re-encryption│ • Execution     │ • History │
-└─────────────────┴─────────────────┴─────────────────┴───────────┘
-```
-
-### FHE Integration Architecture
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    FHE Processing Pipeline                      │
-├─────────────────┬─────────────────┬─────────────────┬───────────┤
-│   Input         │   Encryption    │   Computation   │   Output  │
-│   Phase         │   Phase         │   Phase         │   Phase   │
-├─────────────────┼─────────────────┼─────────────────┼───────────┤
-│ • Strategy      │ • Parameter    │ • Encrypted     │ • Results │
-│   Parameters    │   Encryption    │   Execution     │   Decrypt │
-│ • User Input    │ • Key           │ • FHE Ops       │ • Display │
-│ • Team Data     │   Generation    │ • Verification  │ • Storage │
-│ • Market Data   │ • Proof         │ • Validation    │ • Sharing │
-│                 │   Generation    │ • Optimization  │           │
-└─────────────────┴─────────────────┴─────────────────┴───────────┘
-```
-
-### Smart Contract Architecture
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Smart Contract Layer                         │
-├─────────────────┬─────────────────┬─────────────────┬───────────┤
-│   Strategy      │   Team          │   Sharing       │   Events  │
-│   Management    │   Management    │   & Trading     │   System  │
-├─────────────────┼─────────────────┼─────────────────┼───────────┤
-│ • createStrategy│ • addMember     │ • shareStrategy │ • Strategy│
-│ • updateStrategy│ • removeMember │ • subscribeTo   │   Created │
-│ • executeStrategy│ • setPermissions│ • copyStrategy │ • Team   │
-│ • pauseStrategy │ • roleManagement│ • monetizeStrategy│   Updated │
-│ • deleteStrategy│ • accessControl │ • revenueShare  │ • Strategy│
-│                 │                 │                 │   Shared  │
-└─────────────────┴─────────────────┴─────────────────┴───────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        CovertArbitrageDeck Contract                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Storage Layer                                                           │
+│  ├─ strategies: mapping(bytes32 => Strategy)                            │
+│  ├─ traderStrategies: mapping(address => bytes32[])                     │
+│  ├─ strategySharedWith: mapping(bytes32 => address[])                   │
+│  ├─ sharedWithMe: mapping(address => bytes32[])                         │
+│  └─ isSharedWith: mapping(bytes32 => mapping(address => bool))          │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Encrypted Fields (per Strategy)                                         │
+│  ├─ capitalCipher: euint64        (Initial capital allocation)          │
+│  ├─ exposureCipher: euint64       (Maximum market exposure)             │
+│  ├─ realizedPnLCipher: euint64    (Accumulated profit/loss)             │
+│  ├─ targetReturnBpsCipher: euint32 (Target return in basis points)      │
+│  ├─ stopLossBpsCipher: euint32    (Stop loss threshold in bps)          │
+│  ├─ maxSlippageBpsCipher: euint16 (Max acceptable slippage)             │
+│  ├─ venueCountCipher: euint8      (Number of trading venues)            │
+│  └─ confidenceCipher: euint8      (Strategy confidence score)           │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Core Functions                                                          │
+│  ├─ createStrategy()      - Create encrypted strategy with FHE inputs   │
+│  ├─ activateStrategy()    - Validate & activate (FHE policy checks)     │
+│  ├─ pauseStrategy()       - Temporarily halt execution                  │
+│  ├─ resumeStrategy()      - Resume paused strategy                      │
+│  ├─ completeStrategy()    - Mark as completed                           │
+│  ├─ recordExecution()     - Log trade with encrypted amounts            │
+│  └─ requestPerformanceReview() - Async decryption for performance       │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Sharing Functions                                                       │
+│  ├─ shareStrategy(strategyId, recipient)   - Grant FHE read access      │
+│  ├─ revokeShare(strategyId, user)          - Remove access              │
+│  ├─ getStrategiesSharedWithMe()            - List received shares       │
+│  ├─ getStrategySharedUsers(strategyId)     - List share recipients      │
+│  └─ getSharedStrategyInfo(strategyId)      - Read shared strategy data  │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🔬 FHE Technology Integration
+### FHE Integration Flow
 
-### Fully Homomorphic Encryption in ShadowTrade
-
-ShadowTrade leverages Zama's FHE SDK to provide unprecedented privacy in algorithmic trading:
-
-#### 1. **Strategy Parameter Encryption**
-```typescript
-// Example: Encrypting strategy parameters
-const encryptedParams = await fheInstance.encrypt({
-  capital: 10000,
-  exposure: 0.8,
-  targetReturn: 0.15,
-  stopLoss: 0.05,
-  maxSlippage: 0.02
-});
+```
+User Input → FHE Encryption → On-Chain Storage → FHE Computation → Async Decryption
+     │              │                │                  │                │
+     ▼              ▼                ▼                  ▼                ▼
+┌─────────┐  ┌───────────┐   ┌─────────────┐   ┌─────────────┐   ┌──────────┐
+│ Plain   │  │ Relayer   │   │  fhEVM      │   │ Encrypted   │   │ Gateway  │
+│ Values  │→ │ SDK       │ → │  Contract   │ → │ Operations  │ → │ Decrypt  │
+│         │  │ encrypt() │   │  Storage    │   │ FHE.add()   │   │ Callback │
+└─────────┘  └───────────┘   └─────────────┘   │ FHE.ge()    │   └──────────┘
+                                               │ FHE.le()    │
+                                               │ FHE.and()   │
+                                               └─────────────┘
 ```
 
-#### 2. **Encrypted Computation**
-- **Private Strategy Execution**: Strategies run on encrypted data without decryption
-- **Secure Calculations**: All mathematical operations performed on encrypted values
-- **Privacy-Preserving Analytics**: Performance metrics computed without revealing inputs
+### Strategy Sharing Architecture
 
-#### 3. **Zero-Knowledge Verification**
-- **Proof Generation**: Cryptographic proofs of computation correctness
-- **Verification**: Verify strategy execution without revealing parameters
-- **Audit Trail**: Maintain execution history while preserving privacy
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        Strategy Sharing Flow                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│   Owner                        Contract                     Recipient    │
+│     │                             │                              │       │
+│     │  shareStrategy(id, addr)   │                              │       │
+│     │ ─────────────────────────► │                              │       │
+│     │                             │                              │       │
+│     │                     ┌───────┴───────┐                     │       │
+│     │                     │ FHE.allow()   │                     │       │
+│     │                     │ for each      │                     │       │
+│     │                     │ encrypted     │                     │       │
+│     │                     │ field         │                     │       │
+│     │                     └───────┬───────┘                     │       │
+│     │                             │                              │       │
+│     │                             │   getSharedStrategyInfo()   │       │
+│     │                             │ ◄─────────────────────────── │       │
+│     │                             │                              │       │
+│     │                             │   Strategy data (read-only)  │       │
+│     │                             │ ─────────────────────────── ►│       │
+│     │                             │                              │       │
+│     │  revokeShare(id, addr)     │                              │       │
+│     │ ─────────────────────────► │                              │       │
+│     │                             │   Access revoked             │       │
+│     │                             │ ─────────────────────────── ►│       │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
-#### 4. **Re-encryption for Sharing**
-- **Strategy Sharing**: Securely share strategies with team members
-- **Access Control**: Encrypted strategies with granular permissions
-- **Collaborative Development**: Multiple users can work on encrypted strategies
+## Technology Stack
 
-### FHE Use Cases in ShadowTrade
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Smart Contracts** | Solidity 0.8.24 + fhEVM | On-chain encrypted strategy logic |
+| **FHE Runtime** | Zama fhEVM v0.9.1 | Homomorphic encryption operations |
+| **FHE SDK** | Relayer SDK 0.3.0-5 | Client-side encryption & key management |
+| **Frontend** | React 18 + TypeScript + Vite | Modern SPA with type safety |
+| **Styling** | Tailwind CSS + shadcn/ui | Dark-mode optimized UI components |
+| **Wallet** | RainbowKit + wagmi v2 | Multi-wallet connection |
+| **Network** | Ethereum Sepolia | Testnet deployment |
 
-1. **Private Strategy Creation**
-   - Encrypt strategy parameters before storage
-   - Maintain algorithm confidentiality
-   - Enable secure strategy development
+## Deployment Information
 
-2. **Team Collaboration**
-   - Share encrypted strategies with team members
-   - Collaborative editing of encrypted parameters
-   - Role-based access to strategy components
+| Resource | Address/URL |
+|----------|-------------|
+| **Live Application** | https://shadowtrade.vercel.app |
+| **Contract Address** | `0xF3965f511c3b048fBE572d98abCf044837Adbc7B` |
+| **Network** | Sepolia Testnet (Chain ID: 11155111) |
+| **Block Explorer** | [View on Etherscan](https://sepolia.etherscan.io/address/0xF3965f511c3b048fBE572d98abCf044837Adbc7B) |
 
-3. **Strategy Marketplace**
-   - Monetize successful strategies
-   - Subscribe to premium strategies
-   - Revenue sharing with privacy protection
-
-4. **Professional Services**
-   - Expert traders manage encrypted strategies
-   - Performance-based compensation
-   - Risk management with privacy guarantees
-
-## 🛠️ Technology Stack
-
-### Frontend Layer
-- **React 18** with TypeScript for type-safe development
-- **Vite** for fast development and optimized builds
-- **Tailwind CSS** for responsive, modern UI design
-- **Radix UI** for accessible, customizable components
-- **RainbowKit** for seamless wallet integration
-- **Wagmi** for Ethereum interaction and state management
-
-### Blockchain Layer
-- **Solidity** for smart contract development
-- **Hardhat** for development, testing, and deployment
-- **Ethereum Sepolia** for testnet deployment
-- **IPFS** for decentralized storage of encrypted data
-
-### Privacy & Security Layer
-- **Zama FHE SDK** for fully homomorphic encryption
-- **Zero-Knowledge Proofs** for computation verification
-- **Encrypted Storage** for on-chain data protection
-- **Multi-signature Wallets** for enhanced security
-
-### Infrastructure
-- **Vercel** for frontend deployment and hosting
-- **GitHub** for version control and CI/CD
-- **Sepolia RPC** for blockchain connectivity
-- **WalletConnect** for secure wallet connections
-
-## 🗺️ Development Roadmap
-
-### Phase 1: Core Platform (Q4 2025) ✅
-- [x] FHE integration with Zama SDK
-- [x] Basic strategy creation and management
-- [x] Smart contract deployment on Sepolia
-- [x] Frontend interface development
-- [x] Wallet integration and authentication
-
-### Phase 2: Team Collaboration (Q1 2026)
-- [ ] Multi-user workspace implementation
-- [ ] Role-based permission system
-- [ ] Encrypted strategy sharing
-- [ ] Team management interface
-- [ ] Collaborative strategy development
-
-### Phase 3: Strategy Marketplace (Q2 2026)
-- [ ] Strategy sharing and monetization
-- [ ] Subscription-based access model
-- [ ] Copy trading functionality
-- [ ] Revenue sharing mechanisms
-- [ ] Strategy performance analytics
-
-### Phase 4: Professional Services (Q3 2026)
-- [ ] Expert trader network
-- [ ] Managed strategy services
-- [ ] Advanced risk management
-- [ ] Professional analytics dashboard
-- [ ] API for third-party integrations
-
-### Phase 5: Advanced Features (Q4 2026)
-- [ ] Cross-chain strategy execution
-- [ ] Advanced FHE optimizations
-- [ ] Machine learning integration
-- [ ] Mobile application
-- [ ] Enterprise features
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn package manager
+
+- Node.js 18+
 - MetaMask or compatible Web3 wallet
-- Sepolia testnet ETH for gas fees
+- Sepolia testnet ETH ([Faucet](https://sepoliafaucet.com))
 
-### Installation
+### Local Development
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/CindyJones9181676/ShadowTrade.git
-   cd ShadowTrade
-   ```
+```bash
+# Clone repository
+git clone https://github.com/your-username/ShadowTrade.git
+cd ShadowTrade
 
-2. **Install dependencies**
-   ```bash
-   # Install root dependencies
-   npm install
-   
-   # Install frontend dependencies
-   cd frontend
-   npm install
-   ```
+# Install dependencies
+npm install
+cd frontend && npm install
 
-3. **Configure environment**
-   ```bash
-   # Copy environment template
-   cp .env.example .env
-   
-   # Add your configuration
-   # - Private key for deployment
-   # - RPC URL for Sepolia
-   # - Contract addresses
-   ```
+# Configure environment
+cp .env.example .env
+# Edit .env with your settings
 
-4. **Start development server**
-   ```bash
-   cd frontend
-   npm run dev
-   ```
-
-5. **Access the application**
-   - Open `http://localhost:5173` in your browser
-   - Connect your wallet to Sepolia testnet
-   - Start creating encrypted strategies!
+# Start development server
+npm run dev
+```
 
 ### Smart Contract Deployment
 
-1. **Deploy to Sepolia testnet**
-   ```bash
-   npx hardhat run scripts/deploy.js --network sepolia
-   ```
+```bash
+# Compile contracts
+SEPOLIA_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com" npx hardhat compile
 
-2. **Verify contracts**
-   ```bash
-   npx hardhat verify --network sepolia <CONTRACT_ADDRESS>
-   ```
+# Deploy to Sepolia
+SEPOLIA_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com" npx hardhat run scripts/deploy.js --network sepolia
 
-3. **Update frontend configuration**
-   ```typescript
-   // Update contract address in frontend/src/config/contract.ts
-   export const CONTRACT_ADDRESS = '0x...'; // Your deployed address
-   ```
+# Update frontend config
+# Edit frontend/.env with new contract address
+```
 
-## 📖 Usage Guide
+## Usage Guide
 
-### Creating Your First Strategy
+### Creating a Strategy
 
-1. **Connect Wallet**
-   - Click "Connect Wallet" in the header
-   - Select your preferred wallet (MetaMask, WalletConnect, etc.)
-   - Ensure you're connected to Sepolia testnet
+1. **Connect Wallet**: Click "Connect Wallet" and select Sepolia network
+2. **Navigate to Dashboard**: Access the strategy management interface
+3. **Create Strategy Tab**: Configure your arbitrage parameters:
+   - **Opportunity Type**: Spatial (cross-exchange), Temporal (time-based), Statistical (model-driven), or Triangular (multi-asset)
+   - **Risk Tier**: Conservative, Moderate, or Aggressive
+   - **Capital**: Initial allocation in ETH
+   - **Exposure**: Maximum market exposure limit
+   - **Target Return**: Desired profit target (basis points)
+   - **Stop Loss**: Maximum acceptable loss (basis points)
+   - **Max Slippage**: Tolerance for price slippage
+   - **Venue Count**: Number of trading venues to utilize
+   - **Confidence**: Strategy confidence score
 
-2. **Navigate to Dashboard**
-   - Click "Dashboard" to access the main interface
-   - You'll see the strategy management interface
+4. **FHE Encryption**: Parameters are encrypted client-side using Zama's Relayer SDK
+5. **Submit Transaction**: Confirm the transaction to store encrypted strategy on-chain
 
-3. **Create Strategy**
-   - Click "Create Strategy" button
-   - Fill in strategy parameters:
-     - **Opportunity Type**: Spatial or Temporal arbitrage
-     - **Risk Tier**: Conservative, Moderate, or Aggressive
-     - **Capital**: Amount to allocate
-     - **Target Return**: Expected profit percentage
-     - **Stop Loss**: Maximum loss threshold
-     - **Max Slippage**: Acceptable price slippage
-     - **Venue Count**: Number of trading venues
-     - **Confidence**: Strategy confidence level
+### Managing Strategies
 
-4. **Encrypt and Submit**
-   - Click "Create Strategy" to encrypt parameters
-   - Wait for FHE encryption to complete
-   - Confirm the transaction in your wallet
-   - Strategy will be stored encrypted on-chain
+| Action | Description |
+|--------|-------------|
+| **Activate** | Enable strategy for execution (validates against policy) |
+| **Pause** | Temporarily halt execution |
+| **Resume** | Continue paused strategy |
+| **Complete** | Mark strategy as finished |
 
-### Team Collaboration
+### Sharing Strategies
 
-1. **Invite Team Members**
-   - Navigate to team management
-   - Add team member wallet addresses
-   - Set permission levels for each member
+1. **Open Share Dialog**: Click "Share" button on any strategy card
+2. **Enter Recipient Address**: Input the wallet address to share with
+3. **Confirm Transaction**: Approve the `shareStrategy()` transaction
+4. **Recipient Access**: The recipient can view the strategy in their "Shared With Me" tab
+5. **Revoke Access**: Click the X button next to any shared user to revoke
 
-2. **Share Strategies**
-   - Select strategies to share
-   - Choose team members with access
-   - Set read/write permissions
+### Viewing Shared Strategies
 
-3. **Collaborative Development**
-   - Team members can view shared strategies
-   - Collaborative editing of strategy parameters
-   - Version control for strategy changes
+1. Navigate to **Dashboard** → **Shared With Me** tab
+2. View all strategies that others have shared with you
+3. Access includes: strategy type, risk tier, status, execution statistics
+4. Note: Shared access is read-only
 
-### Strategy Sharing & Monetization
+## FHE Deep Dive
 
-1. **Share Public Strategies**
-   - Mark strategies as shareable
-   - Set subscription pricing
-   - Enable copy trading for followers
+### Encrypted Data Types
 
-2. **Subscribe to Strategies**
-   - Browse available strategies
-   - Subscribe to premium strategies
-   - Copy trade successful strategies
+| Type | Size | Use Case |
+|------|------|----------|
+| `euint8` | 8-bit | Venue count, confidence scores |
+| `euint16` | 16-bit | Slippage tolerance (basis points) |
+| `euint32` | 32-bit | Return targets, stop loss (basis points) |
+| `euint64` | 64-bit | Capital amounts, exposure limits, PnL |
 
-3. **Revenue Management**
-   - Track earnings from strategy sharing
-   - Manage subscription payments
-   - Monitor strategy performance
+### FHE Operations Used
 
-## 🔒 Security & Privacy
+```solidity
+// Comparison operations for policy validation
+FHE.ge(capitalCipher, FHE.asEuint64(minCapital))  // Greater than or equal
+FHE.le(capitalCipher, FHE.asEuint64(maxCapital))  // Less than or equal
+
+// Logical operations for compound conditions
+FHE.and(condition1, condition2)  // Combine multiple validations
+
+// Permission management for sharing
+FHE.allow(ciphertext, recipientAddress)  // Grant read access
+FHE.allowThis(ciphertext)  // Allow contract to operate on data
+```
+
+### Async Decryption Pattern
+
+```solidity
+// Request decryption via Gateway
+uint256 requestId = Gateway.requestDecryption(
+    cts,           // Array of ciphertexts to decrypt
+    this.callback, // Callback function
+    0,             // Request ID
+    block.timestamp + 1 hours,  // Max wait time
+    false          // Not trustless
+);
+
+// Callback receives plaintext results
+function performanceReviewCallback(
+    uint256 requestId,
+    uint64 profitability,
+    uint8 performanceBand
+) external onlyGateway {
+    // Process decrypted values
+}
+```
+
+## Project Structure
+
+```
+ShadowTrade/
+├── contracts/
+│   └── CovertArbitrageDeck.sol    # Main FHE-enabled strategy contract
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── CreateStrategyForm.tsx   # Strategy creation with FHE
+│   │   │   ├── StrategyList.tsx         # Strategy management
+│   │   │   ├── SharedStrategyList.tsx   # Received shares view
+│   │   │   ├── ShareStrategyDialog.tsx  # Sharing interface
+│   │   │   └── ui/                      # shadcn/ui components
+│   │   ├── hooks/
+│   │   │   └── useStrategies.ts         # Strategy & sharing hooks
+│   │   ├── lib/
+│   │   │   └── fhe.ts                   # FHE SDK integration
+│   │   ├── config/
+│   │   │   └── contract.ts              # Contract ABI & address
+│   │   └── pages/
+│   │       ├── Landing.tsx              # Home page
+│   │       └── Dashboard.tsx            # Strategy management
+│   └── index.html                       # COOP/COEP headers for FHE
+├── scripts/
+│   └── deploy.js                        # Deployment script
+└── hardhat.config.js                    # Hardhat configuration
+```
+
+## Security Considerations
 
 ### FHE Security Model
-- **End-to-End Encryption**: All strategy data encrypted before storage
-- **Zero-Knowledge Execution**: Strategies run without revealing logic
-- **Cryptographic Proofs**: Verify computation correctness
-- **Access Control**: Granular permissions for encrypted data
+- **Client-Side Encryption**: Sensitive data never leaves the user's browser unencrypted
+- **On-Chain Privacy**: All stored values are ciphertexts, unreadable without decryption
+- **Access Control**: `FHE.allow()` provides cryptographic access management
+- **Gateway Decryption**: Only authorized requests can trigger decryption
 
 ### Smart Contract Security
-- **Audited Contracts**: Professional security audits
-- **Access Controls**: Role-based permissions
-- **Upgrade Mechanisms**: Secure contract upgrades
-- **Emergency Pauses**: Circuit breakers for security
+- **Access Modifiers**: `onlyOwner`, `strategyExists`, `onlyGateway` guards
+- **Validation**: Policy checks using FHE comparisons before activation
+- **Immutable Storage**: Strategy parameters cannot be modified after creation
 
-### Wallet Security
-- **Multi-signature Support**: Enhanced security for large operations
-- **Hardware Wallet Integration**: Support for Ledger, Trezor
-- **Secure Key Management**: No private key storage on platform
+## Future Roadmap
 
-## 🌐 Network Configuration
+- [ ] **Strategy Marketplace**: Public sharing with subscription model
+- [ ] **Copy Trading**: Follow successful traders with privacy preservation
+- [ ] **Multi-Chain Support**: Deploy on Arbitrum, Polygon, etc.
+- [ ] **Advanced Analytics**: Encrypted performance aggregation
+- [ ] **Mobile App**: Native iOS/Android applications
+- [ ] **API Access**: Programmatic strategy management
 
-### Current Deployment
-- **Network**: Ethereum Sepolia Testnet
-- **Chain ID**: 11155111
-- **Contract Address**: `0xd7352dAC0D73358c32C53b132Bf0d3005ECB1077`
-- **RPC URL**: `https://ethereum-sepolia-rpc.publicnode.com`
-- **Explorer**: https://sepolia.etherscan.io
+## Contributing
 
-### Production Deployment (Future)
-- **Network**: Ethereum Mainnet
-- **Chain ID**: 1
-- **Additional Networks**: Polygon, Arbitrum, Optimism
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting PRs.
 
-## 📊 Performance Metrics
-
-### FHE Performance
-- **Encryption Speed**: < 2 seconds for strategy parameters
-- **Computation Overhead**: 3-5x compared to plaintext operations
-- **Storage Efficiency**: Optimized encrypted data storage
-- **Verification Time**: < 1 second for proof verification
-
-### Platform Performance
-- **Strategy Creation**: < 30 seconds end-to-end
-- **Team Collaboration**: Real-time updates
-- **Strategy Sharing**: Instant access for subscribers
-- **Analytics**: Real-time performance tracking
-
-## 🤝 Contributing
-
-We welcome contributions to ShadowTrade! Here's how you can help:
-
-### Development
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests for new functionality
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
-
-### Areas for Contribution
-- **FHE Optimizations**: Improve encryption/decryption performance
-- **UI/UX Enhancements**: Better user experience
-- **Smart Contract Features**: New functionality
-- **Testing**: Comprehensive test coverage
-- **Documentation**: Improve guides and examples
-
-### Bug Reports
-- Use GitHub Issues for bug reports
-- Include detailed reproduction steps
-- Provide environment information
-- Attach relevant logs or screenshots
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **Zama** for FHE SDK and homomorphic encryption technology
-- **RainbowKit** for wallet connection infrastructure
-- **Wagmi** for Ethereum interaction utilities
-- **Radix UI** for accessible component primitives
-- **Vercel** for deployment and hosting services
-- **Ethereum Foundation** for blockchain infrastructure
-
-## 📞 Support & Community
-
-### Getting Help
-- **GitHub Issues**: Report bugs and request features
-- **Documentation**: Comprehensive guides and API docs
-- **Community Forum**: Join discussions and get help
-- **Discord**: Real-time community support
-
-### Contact Information
-- **Website**: https://shadowtrade-joh8jox9y-songsus-projects.vercel.app
-- **GitHub**: https://github.com/CindyJones9181676/ShadowTrade
-- **Email**: [Contact Information]
+- [Zama](https://zama.ai) for fhEVM and Fully Homomorphic Encryption technology
+- [RainbowKit](https://rainbowkit.com) for wallet connection
+- [wagmi](https://wagmi.sh) for Ethereum hooks
+- [shadcn/ui](https://ui.shadcn.com) for UI components
 
 ---
 
-**ShadowTrade** - Where privacy meets profit in the world of algorithmic trading. Built with FHE technology to protect your most valuable asset: your trading strategies.
+**ShadowTrade** - Trade with confidence. Keep your strategies private.
